@@ -1,3 +1,4 @@
+#include "gdbjitblock.h"
 #include "jitreader.h"
 
 GDB_DECLARE_GPL_COMPATIBLE_READER;
@@ -5,6 +6,14 @@ GDB_DECLARE_GPL_COMPATIBLE_READER;
 extern "C" {
 
 gdb_status felix86_gdb_read_debug_info(struct gdb_reader_funcs* self, struct gdb_symbol_callbacks* cb, void* memory, long memory_sz) {
+    felix86_jit_block_t* block = (felix86_jit_block_t*)memory;
+
+    struct gdb_object* object = cb->object_open(cb);
+    struct gdb_symtab* symtab = cb->symtab_open(cb, object, block->filename);
+    cb->block_open(cb, symtab, NULL, block->host_start, block->host_end, "temp_name");
+    cb->line_mapping_add(cb, symtab, block->line_count, block->lines);
+    cb->symtab_close(cb, symtab);
+    cb->object_close(cb, object);
 
     return GDB_SUCCESS;
 }
