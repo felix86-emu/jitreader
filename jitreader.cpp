@@ -13,6 +13,10 @@ gdb_status felix86_gdb_read_debug_info(struct gdb_reader_funcs* self, struct gdb
     char name[16];
     snprintf(name, 16, "%lx", block->guest_address);
     cb->block_open(cb, symtab, NULL, block->host_start, block->host_end, name);
+    printf("count: %d\n", block->line_count);
+    for (int i = 0; i < block->line_count; i++) {
+        printf("line %d: %lx %d\n", i, block->lines[i].pc, block->lines[i].line);
+    }
     cb->line_mapping_add(cb, symtab, block->line_count, block->lines);
     cb->symtab_close(cb, symtab);
     cb->object_close(cb, object);
