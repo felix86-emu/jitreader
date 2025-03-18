@@ -4,6 +4,8 @@ GDB_DECLARE_GPL_COMPATIBLE_READER;
 
 extern "C" {
 
+// Due to https://sourceware.org/bugzilla/show_bug.cgi?id=32248 it seems that line mappings crash gdb
+// They should be fine, they just don't work on gdb :(
 gdb_status felix86_gdb_read_debug_info(struct gdb_reader_funcs* self, struct gdb_symbol_callbacks* cb, void* memory, long memory_sz) {
     felix86_jit_block_t* block = (felix86_jit_block_t*)memory;
     struct gdb_object* object = cb->object_open(cb);
@@ -11,17 +13,9 @@ gdb_status felix86_gdb_read_debug_info(struct gdb_reader_funcs* self, struct gdb
     char name[16];
     snprintf(name, 16, "%lx", block->guest_address);
     cb->block_open(cb, symtab, NULL, block->host_start, block->host_end, name);
-    printf("count: %d\n", block->line_count);
-    printf("filename: %s\n", block->filename);
-    for (int i = 0; i < block->line_count; i++) {
-        printf("line %d: %lx %d\n", i, block->lines[i].pc, block->lines[i].line);
-    }
     cb->line_mapping_add(cb, symtab, block->line_count, block->lines);
     cb->symtab_close(cb, symtab);
     cb->object_close(cb, object);
-
-    printf("block %s -> %lx-%lx\n", name, block->host_start, block->host_end);
-
     return GDB_SUCCESS;
 }
 
