@@ -17,6 +17,8 @@ gdb_status felix86_gdb_read_debug_info(struct gdb_reader_funcs* self, struct gdb
     cb->symtab_close(cb, symtab);
     cb->object_close(cb, object);
 
+    printf("block %s -> %lx-%lx\n", name, block->host_start, block->host_end);
+
     return GDB_SUCCESS;
 }
 
